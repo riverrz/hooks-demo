@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";
+import React, { useState, useEffect, useReducer, useRef, useMemo } from "react";
 import axios from "axios";
 
+import List from "./List";
+
 const Todo = props => {
+  const [inputIsValid, setInputIsValid] = useState(false);
   // const [todoName, setTodoName] = useState("");
   // const [todoList, setTodoList] = useState([]);
   // const [submittedTodo, setSubmittedTodo] = useState(null);
@@ -75,6 +78,14 @@ const Todo = props => {
       });
   };
 
+  const inputValidationHandler = event => {
+    if (event.target.value.trim() === "") {
+      setInputIsValid(false);
+    } else {
+      setInputIsValid(true);
+    }
+  };
+
   const todoRemoveHandler = todoId => {
     axios
       .delete(`https://react-hooks-3a8b3.firebaseio.com/todos/${todoId}.json`)
@@ -91,19 +102,18 @@ const Todo = props => {
         id="todo"
         placeholder="Todo"
         ref={todoInputRef}
-        // onChange={inputChangeHandler}
-        // value={todoName}
+        onChange={inputValidationHandler}
+        style={{ backgroundColor: inputIsValid ? "transparent" : "red" }}
       />
       <button type="button" onClick={todoAddHandler}>
         Add
       </button>
-      <ul>
-        {todoList.map(todo => (
-          <li key={todo.id} onClick={todoRemoveHandler.bind(this, todo.id)}>
-            {todo.name}
-          </li>
-        ))}
-      </ul>
+      {useMemo(
+        () => (
+          <List items={todoList} onClick={todoRemoveHandler} />
+        ),
+        [todoList]
+      )}
     </React.Fragment>
   );
 };

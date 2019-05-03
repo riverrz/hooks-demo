@@ -4,7 +4,7 @@ import axios from "axios";
 const Todo = props => {
   const [todoName, setTodoName] = useState("");
   // const [todoList, setTodoList] = useState([]);
-  const [submittedTodo, setSubmittedTodo] = useState(null);
+  // const [submittedTodo, setSubmittedTodo] = useState(null);
 
   const todoListReducer = (state, action) => {
     switch (action.type) {
@@ -49,11 +49,11 @@ const Todo = props => {
   // which when changed will cause useEffect to execute again
   // Empty [] implies only execute useEffect once!(componentDidMount)
 
-  useEffect(() => {
-    if (submittedTodo) {
-      dispatch({ type: "ADD", payload: submittedTodo });
-    }
-  }, [submittedTodo]);
+  // useEffect(() => {
+  //   if (submittedTodo) {
+  //     dispatch({ type: "ADD", payload: submittedTodo });
+  //   }
+  // }, [submittedTodo]);
 
   const inputChangeHandler = event => {
     setTodoName(event.target.value);
@@ -66,12 +66,22 @@ const Todo = props => {
       .then(res => {
         console.log(res);
         const todoItem = { id: res.data.name, name: todoName };
-        setSubmittedTodo(todoItem);
+        dispatch({ type: "ADD", payload: todoItem });
       })
       .catch(err => {
         console.log(err);
       });
   };
+
+  const todoRemoveHandler = todoId => {
+    axios
+      .delete(`https://react-hooks-3a8b3.firebaseio.com/todos/${todoId}.json`)
+      .then(res => {
+        dispatch({ type: "REMOVE", payload: todoId });
+      })
+      .catch(console.log);
+  };
+
   return (
     <React.Fragment>
       <input
@@ -87,7 +97,9 @@ const Todo = props => {
       </button>
       <ul>
         {todoList.map(todo => (
-          <li key={todo.id}>{todo.name}</li>
+          <li key={todo.id} onClick={todoRemoveHandler.bind(this, todo.id)}>
+            {todo.name}
+          </li>
         ))}
       </ul>
     </React.Fragment>

@@ -4,6 +4,8 @@ import axios from "axios";
 const Todo = props => {
   const [todoName, setTodoName] = useState("");
   const [todoList, setTodoList] = useState([]);
+  const [submittedTodo, setSubmittedTodo] = useState(null);
+
   // useEffect runs after every render cycle by default!
   useEffect(() => {
     axios
@@ -30,17 +32,25 @@ const Todo = props => {
   // [] here will contain the entities which needs to be checked
   // which when changed will cause useEffect to execute again
   // Empty [] implies only execute useEffect once!(componentDidMount)
+
+  useEffect(() => {
+    if (submittedTodo) {
+      setTodoList(todoList.concat(submittedTodo));
+    }
+  }, [submittedTodo]);
+
   const inputChangeHandler = event => {
     setTodoName(event.target.value);
   };
   const todoAddHandler = () => {
-    setTodoList(todoList.concat({ id: todoList.length, name: todoName }));
     axios
       .post("https://react-hooks-3a8b3.firebaseio.com/todos.json", {
         name: todoName
       })
       .then(res => {
         console.log(res);
+        const todoItem = { id: res.data.name, name: todoName };
+        setSubmittedTodo(todoItem);
       })
       .catch(err => {
         console.log(err);
